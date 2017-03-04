@@ -111,20 +111,18 @@ function draw(){
 			show(current[0], current[1], color(0,0,255));
 			parent = camefrom[current[0]][current[1]];
 			
-			iter = 0;
+		
 			while (parent){
 				
 			show(parent[0], parent[1], color(0, 0, 255));
-				parent = camefrom[parent[0]][parent[1]];
+			parent = camefrom[parent[0]][parent[1]];
 
-				if (iter == 20){
-					break;
-				}
-				iter++;
+				
 			}
 			console.log('finished');
 			noLoop();
 			return;
+			
 		}
 
 		deletefromopen(min);
