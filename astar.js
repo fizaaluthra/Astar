@@ -10,10 +10,11 @@ var gScores = new Array(cols);
 var hScores = new Array(cols);
 var neighbours = new Array(cols);
 var camefrom = new Array(cols);
+var obstacle = new Array(cols);
 
-function includes (spot){
-	for (k = 0; k < closed_set.length ; ++k){
-		if (closed_set[k][0] === spot[0] && closed_set[k][1] === spot[1]){
+function includes (arr, spot){
+	for (k = 0; k < arr.length ; ++k){
+		if (arr[k][0] === spot[0] && arr[k][1] === spot[1]){
 			return true;
 		}
 	}
@@ -21,6 +22,7 @@ function includes (spot){
 }
 function heurestic(start, end){
 	var d = dist(start[0], start[1], end[0], end[1]);
+	return d;
 }
 function addNeighbours( i , j ) {
 
@@ -38,7 +40,19 @@ function addNeighbours( i , j ) {
 	if (j > 0){
 		neighbours[i][j].push([i, j	- 1]);
 	}
+	if (i > 0 && j > 0){
+		neighbours[i][j].push([i - 1, j - 1]);
 
+	}
+	if (i < cols - 1 && j > 0){
+		neighbours[i][j].push([i + 1, j - 1]);
+	}
+	if (i > 0 && j < rows - 1){
+		neighbours[i][j].push([i - 1, j + 1]);
+	}
+	if (i < cols - 1 && j  < rows - 1){
+		neighbours[i][j].push([i + 1, j + 1]);
+	}
 
 }
 
@@ -73,6 +87,7 @@ function setup(){
 		hScores[i] = new Array(rows);
 		neighbours[i] = new Array(rows);
 		camefrom[i] = new Array(rows);
+		obstacle[i] = new Array(rows);
 	}
 
 	for (i = 0; i < cols; ++i){
@@ -81,6 +96,13 @@ function setup(){
 			fScores[i][j] = 0;
 			gScores[i][j] = 0;
 			hScores[i][j] = heurestic([i,j], end); 
+
+			if (random(1) < 0.15){
+				obstacle[i][j] = true;
+			}
+			else{
+				obstacle[i][j] = false;
+			}
 		}
 	}
 
@@ -104,6 +126,8 @@ function draw(){
 				min[1] = node[1];
 			}
 		}
+		
+		console.log(min);
 	
 		if (min[0] === end[0] && min[1] === end[1]){
 
@@ -131,12 +155,11 @@ function draw(){
 		for (var i = 0; i < neighbours[min[0]][min[1]].length; ++i){
 
 			neighbour = neighbours[min[0]][min[1]][i];
-			
-			if (!includes(neighbour)){
+			if ((!includes(closed_set, neighbour)) && (!obstacle[neighbour[0]][neighbour[1]])){
 			
 			flag = 0;
-			tentative_gScore = gScores[min[0]][min[1]] + 1; // not true for diagonals -- diagonals you have to add root 2
-			if (!open_set.includes(neighbour)){
+			tentative_gScore = gScores[min[0]][min[1]] + dist(min[0],min[1], neighbour[0], neighbour[1]); 
+			if (!includes(open_set, neighbour)){
 				open_set.push(neighbour);
 				gScores[neighbour[0]][neighbour[1]] = tentative_gScore;
 				flag = 1;
@@ -146,9 +169,10 @@ function draw(){
 				flag =1;
 			}
 
+			console.log(hScores[neighbour[0]][neighbour[1]])
 			if(flag ==1){ // this is the best record it 
 				fScores[neighbour[0]][neighbour[1]] = tentative_gScore + hScores[neighbour[0]][neighbour[1]];
-				
+				console.log(fScores[neighbour[0]][neighbour[1]])
 				camefrom[neighbour[0]][neighbour[1]] = min;
 				
 			}
@@ -163,7 +187,12 @@ function draw(){
 
 	for(i = 0; i < cols; ++i){
 		for (j = 0; j < rows; ++j){
-			show(i , j, 255);
+			if (!obstacle[i][j]){
+				show(i , j, 255);
+			}
+			else{
+				show(i , j, 0);
+			}
 		}
 	}
 
@@ -176,4 +205,5 @@ function draw(){
 		node = closed_set[i];
 		show(node[0], node[1], color(255, 0, 0));
 	}
+
 }
