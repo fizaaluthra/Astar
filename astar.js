@@ -1,8 +1,17 @@
+
 function BinaryHeap(scorer){
 	this.elements = [];
 	this.scorer = scorer; 
 	this.push = function (element){
-		this.elements.push(element);
+		if (this.elements.length == 0){
+			this.elements[0] = element;
+		}
+		else{
+			this.elements.push(element);
+		}
+
+
+
 
 		this.bubbleup(this.elements.length - 1); // pass in the index where you pushed the new element
 	}
@@ -32,12 +41,17 @@ function BinaryHeap(scorer){
 	}
 
 	this.pop = function(){
+		if(this.elements.length > 1){
 		var result = this.elements[0] // return the minimum score element
 
 		var end = this.elements.pop(); // get the last element
 
 		this.elements[0] = end;
 		this.sinkdown(0);
+		}
+		else{
+			result = this.elements.pop();
+		}
 		
 
 		return result;
@@ -93,7 +107,6 @@ function BinaryHeap(scorer){
 }
 
 
-
 var cols = 15;
 var rows = 15;
 var open_set = new BinaryHeap(function(arr) { 
@@ -109,10 +122,11 @@ var neighbours = new Array(cols);
 var camefrom = new Array(cols);
 var obstacle = new Array(cols);
 
+
 function includes (arr, spot){
 	for (k = 0; k < arr.length ; ++k){
 		if (arr[k][0] === spot[0] && arr[k][1] === spot[1]){
-			return true;
+			return k+1;
 		}
 	}
 	return false;
@@ -186,18 +200,20 @@ function setup(){
 			fScores[i][j] = 0;
 			gScores[i][j] = 0;
 			hScores[i][j] = heurestic([i,j], end); 
-
+			obstacle[i][j] = false;
 			if (random(1) < 0.25){
 				obstacle[i][j] = true;
 			}
 			else{
 				obstacle[i][j] = false;
-			}
+				}
 		}
 	}
 
-
- open_set.push(start);
+	open_set.push(start);
+	
+	
+ 
  
  console.time('someFunction');
 
@@ -207,8 +223,8 @@ function setup(){
 function draw(){
 	length = open_set.elements.length;
 
-	if (length > 0){
-
+		if (length > 0){
+		
 		var min =  open_set.pop();
 		
 		//for (var counter = 0; counter < length; ++counter){
@@ -219,7 +235,8 @@ function draw(){
 			//}
 		//}
 		
-		
+	
+
 		if (min[0] === end[0] && min[1] === end[1]){
 
 			current = min;
@@ -242,20 +259,23 @@ function draw(){
 			
 		}
 
-		deletefromopen(min);
-		closed_set.push(min);
 		
+		closed_set.push(min);
+
 		for (var i = 0; i < neighbours[min[0]][min[1]].length; ++i){
 
 			neighbour = neighbours[min[0]][min[1]][i];
 			if ((!includes(closed_set, neighbour)) && (!obstacle[neighbour[0]][neighbour[1]])){
 			
 			flag = 0;
+			flag2 = 0;
 			tentative_gScore = gScores[min[0]][min[1]] + dist(min[0],min[1], neighbour[0], neighbour[1]); 
-			if (!includes(open_set.elements, neighbour)){
-				open_set.push(neighbour);
+			index = includes(open_set.elements, neighbour);
+			if (!index){
+				
 				gScores[neighbour[0]][neighbour[1]] = tentative_gScore;
 				flag = 1;
+				flag2 = 1;
 			}
 			else if (tentative_gScore < gScores[neighbour[0]][neighbour[1]]){
 				gScores[neighbour[0]][neighbour[1]] = tentative_gScore;
@@ -267,6 +287,14 @@ function draw(){
 				fScores[neighbour[0]][neighbour[1]] = tentative_gScore + hScores[neighbour[0]][neighbour[1]];
 				
 				camefrom[neighbour[0]][neighbour[1]] = min;
+				if (flag2==1){
+				open_set.push(neighbour);
+				}
+				else{
+					open_set.bubbleup(index-1);
+					open_set.sinkdown(index-1);
+				}
+
 				
 			}
 			}
