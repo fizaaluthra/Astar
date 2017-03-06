@@ -1,7 +1,104 @@
-var cols = 10;
-var rows = 10;
-var open_set = [];
-var closed_set= [];
+function BinaryHeap(scorer){
+	this.elements = [];
+	this.scorer = scorer; 
+	this.push = function (element){
+		this.elements.push(element);
+
+		this.bubbleup(this.elements.length - 1); // pass in the index where you pushed the new element
+	}
+
+	this.bubbleup = function (n){
+		
+		
+
+		while(n > 0){
+			var element = this.elements[n];
+			var parent_n = Math.floor((n+1)/2) - 1;
+			var parent_score = scorer(this.elements[parent_n]);
+			var element_score = scorer(element);
+
+
+			if (parent_score < element_score){
+				break;
+			}
+			this.elements[n] = this.elements[parent_n];
+			this.elements[parent_n] = element;
+			
+
+		
+			n = parent_n;
+		}
+
+	}
+
+	this.pop = function(){
+		var result = this.elements[0] // return the minimum score element
+
+		var end = this.elements.pop(); // get the last element
+
+		this.elements[0] = end;
+		this.sinkdown(0);
+		
+
+		return result;
+	}
+
+	this.sinkdown = function(n){
+		var element = this.elements[n];
+		var element_score = scorer(element);
+		
+		while (true){
+			
+			var child1_n =  (n + 1) * 2;
+			var child2_n = child1_n - 1;
+			var flag = 0;
+
+			if(child1_n < this.elements.length){
+				var child1 = this.elements[child1_n];
+				var child1_score = scorer(child1);
+				if (child1_score < element_score){
+					flag = child1_n;
+				}
+			} 
+		
+			if (child2_n < this.elements.length){
+				
+				var child2 = this.elements[child2_n];
+				var child2_score = scorer(child2);
+				if(flag == 0){
+					if (child2_score < element_score){
+						flag = child2_n;
+					}
+				}
+				else {
+					if (child2_score < child1_score){
+						flag = child2_n;
+					}
+				}
+			}
+			if (flag == 0) {
+				break;
+			}
+
+			this.elements[n] = this.elements[flag];
+			this.elements[flag] = element;
+
+			n = flag;
+			
+		}
+
+
+
+	}
+}
+
+
+
+var cols = 15;
+var rows = 15;
+var open_set = new BinaryHeap(function(arr) { 
+					return fScores[arr[0]][arr[1]]; });
+var closed_set = [];
 var wtrue;
 var htrue;
 
@@ -56,14 +153,7 @@ function addNeighbours( i , j ) {
 
 }
 
-function deletefromopen(indices){
-	var node = open_set.length - 1;
-	for (node; node>= 0; --node){
-		if (open_set[node][0] === indices[0] && open_set[node][1] === indices[1]){
-			open_set.splice(node, 1);
-		}
-	}
-}
+
 function show(i, j, color){
 	fill(color);
 	stroke(0);
@@ -97,7 +187,7 @@ function setup(){
 			gScores[i][j] = 0;
 			hScores[i][j] = heurestic([i,j], end); 
 
-			if (random(1) < 0.15){
+			if (random(1) < 0.25){
 				obstacle[i][j] = true;
 			}
 			else{
@@ -108,27 +198,28 @@ function setup(){
 
 
  open_set.push(start);
-
+ 
+ console.time('someFunction');
 
 }
 
 
 function draw(){
-	length = open_set.length;
+	length = open_set.elements.length;
 
 	if (length > 0){
 
-		var min =  open_set[0];
-		for (var counter = 0; counter < length; ++counter){
-			node = open_set[counter];
-			if (fScores[node[0]][node[1]] < fScores[min[0]][min[1]]){
-				min[0] = node[0];
-				min[1] = node[1];
-			}
-		}
+		var min =  open_set.pop();
 		
-		console.log(min);
-	
+		//for (var counter = 0; counter < length; ++counter){
+			//node = open_set[counter];
+			//if (fScores[node[0]][node[1]] < fScores[min[0]][min[1]]){
+			//	min[0] = node[0];
+			//	min[1] = node[1];
+			//}
+		//}
+		
+		
 		if (min[0] === end[0] && min[1] === end[1]){
 
 			current = min;
@@ -144,6 +235,8 @@ function draw(){
 				
 			}
 			console.log('finished');
+			console.timeEnd('someFunction');
+
 			noLoop();
 			return;
 			
@@ -159,7 +252,7 @@ function draw(){
 			
 			flag = 0;
 			tentative_gScore = gScores[min[0]][min[1]] + dist(min[0],min[1], neighbour[0], neighbour[1]); 
-			if (!includes(open_set, neighbour)){
+			if (!includes(open_set.elements, neighbour)){
 				open_set.push(neighbour);
 				gScores[neighbour[0]][neighbour[1]] = tentative_gScore;
 				flag = 1;
@@ -169,10 +262,10 @@ function draw(){
 				flag =1;
 			}
 
-			console.log(hScores[neighbour[0]][neighbour[1]])
+			
 			if(flag ==1){ // this is the best record it 
 				fScores[neighbour[0]][neighbour[1]] = tentative_gScore + hScores[neighbour[0]][neighbour[1]];
-				console.log(fScores[neighbour[0]][neighbour[1]])
+				
 				camefrom[neighbour[0]][neighbour[1]] = min;
 				
 			}
@@ -196,8 +289,8 @@ function draw(){
 		}
 	}
 
-	for (i = 0; i < open_set.length; ++i){
-		node = open_set[i];
+	for (i = 0; i < open_set.elements.length; ++i){
+		node = open_set.elements[i];
 		show(node[0], node[1], color(0, 255, 0));
 	}
 
