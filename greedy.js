@@ -1,15 +1,12 @@
-function astar_setup(algo_choice){
-	open_set = new BinaryHeap(function(arr) { 
-					return fScores[arr[0]][arr[1]]; });
-	closed_set = [];
-
-	path_found = 0;
-	wtrue = (width / cols) - 1;
-	htrue = (height / rows) - 1;
-	var i,j;
-	for(i = 0; i < cols; ++i){
-		fScores[i] = new Array(rows);
-		gScores[i] = new Array(rows);
+function greedy_setup(){
+		open_set = new BinaryHeap(function(arr) { 
+					return hScores[arr[0]][arr[1]]; });
+		closed_set = [];
+		path_found = 0;
+		wtrue = (width / cols) - 1;
+		htrue = (height / rows) - 1;
+		var i,j;
+		for(i = 0; i < cols; ++i){
 		hScores[i] = new Array(rows);
 		neighbours[i] = new Array(rows);
 		camefrom[i] = new Array(rows);
@@ -19,38 +16,22 @@ function astar_setup(algo_choice){
 	for (i = 0; i < cols; ++i){
 		for (j = 0; j < rows; ++j){
 			addNeighbours(i, j);
-			fScores[i][j] = 0;
-			gScores[i][j] = 0;
-			hScores[i][j] = 0;
-			if(algo_choice == 1){
 			hScores[i][j] = heurestic([i,j], end); 
-			}
 			obstacle[i][j] = false;
-			if (random(1) < 0.15){
+			if (random(1) < 0.25){
 				obstacle[i][j] = true;
 			}
 		}
 	}
 	open_set.push(start);
 }
-function astar(){
-	
+function greedy(){
+
 		length = open_set.elements.length;
 
 		if (length > 0){
 		
 		var min =  open_set.pop();
-		
-		//for (var counter = 0; counter < length; ++counter){
-			//node = open_set[counter];
-			//if (fScores[node[0]][node[1]] < fScores[min[0]][min[1]]){
-			//	min[0] = node[0];
-			//	min[1] = node[1];
-			//}
-		//}
-		
-	
-
 		if(min[0] === end[0] && min[1] === end[1]) {
 	
 			current = min;
@@ -75,52 +56,25 @@ function astar(){
 			
 		}
 
-		
-		closed_set.push(min);
+
+	
+	closed_set.push(min);
+
 
 		for (var i = 0; i < neighbours[min[0]][min[1]].length; ++i){
 
 			neighbour = neighbours[min[0]][min[1]][i];
 			if ((!includes(closed_set, neighbour)) && (!obstacle[neighbour[0]][neighbour[1]])){
-			
-			flag = 0;
-			flag2 = 0;
-			tentative_gScore = gScores[min[0]][min[1]] + dist(min[0],min[1], neighbour[0], neighbour[1]); 
-			index = includes(open_set.elements, neighbour);
-			if (!index){
-				
-				gScores[neighbour[0]][neighbour[1]] = tentative_gScore;
-				flag = 1;
-				flag2 = 1;
-			}
-			else if (tentative_gScore < gScores[neighbour[0]][neighbour[1]]){
-				gScores[neighbour[0]][neighbour[1]] = tentative_gScore;
-				flag =1;
-			}
-
-			
-			if(flag ==1){ // this is the best record it 
-				fScores[neighbour[0]][neighbour[1]] = tentative_gScore + hScores[neighbour[0]][neighbour[1]];
 				
 				camefrom[neighbour[0]][neighbour[1]] = min;
-				if (flag2==1){
 				open_set.push(neighbour);
-				}
-				else{
-					open_set.bubbleup(index-1);
-					open_set.sinkdown(index-1);
-				}
+
 
 				
-			}
+	
 			}
 		}
-
-	} else {
-
-	}
-
-	background(0);
+		background(0);
 
 	for(i = 0; i < cols; ++i){
 		for (j = 0; j < rows; ++j){
@@ -156,5 +110,6 @@ function astar(){
 
 				
 	}
+}
 
 }
