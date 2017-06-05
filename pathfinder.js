@@ -2,7 +2,7 @@
 
 var cols = 13;
 var rows = 13;
-var open_set = new BinaryHeap(function(arr) { 
+var open_set = new BinaryHeap(function(arr) {
 					return fScores[arr[0]][arr[1]]; });
 var closed_set = [];
 var wtrue;
@@ -73,10 +73,10 @@ function setup(){
 
  	start = [0, 0];
  	end = [cols - 1 ,rows - 1];
- 
 
-	createCanvas(400, 400);
-	
+	setup_maze();
+	//createCanvas(400, 400);
+
 
 	var astar_button = createButton('Astar');
 	var djikstra_button = createButton('Djikstra');
@@ -84,7 +84,7 @@ function setup(){
 	astar_button.mousePressed(function(){
 		algo_choice = 1;
 		astar_setup(1);
-	
+
 	});
 	djikstra_button.mousePressed(function(){
 		algo_choice = 2;
@@ -94,7 +94,7 @@ function setup(){
 		algo_choice = 3;
 		greedy_setup();
 	});
- 
+
  console.time('pathfunction');
 
 }
